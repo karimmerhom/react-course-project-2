@@ -1,14 +1,22 @@
 import { useState, useEffect } from "react";
-import { update, search} from "../BooksAPI";
+import { update, search, getAll} from "../BooksAPI";
 import "./search.page.style.css";
 
 function SearchPage() {
 
 
     const [searchedBooks, setSearchedBooks] = useState([]);
+    const [myBooks, setMyBooks] = useState([]);
 
     useEffect(() => {
-            
+      const getAllBooks = async () => {
+
+        const response = await getAll();
+        setMyBooks(response);
+
+        };
+        getAllBooks();
+
     }, [searchedBooks])
 
     const handleChangeSearchField = async (e) => {
@@ -23,6 +31,22 @@ function SearchPage() {
 
           else if(!searched.error)
           {
+
+          searched.forEach( book => {
+
+                const found = myBooks.find(element => element.id === book.id);
+                
+
+                if(found){
+                  book.shelf = found.shelf;
+    
+                }
+                else{
+                  book.shelf = "none";
+                }
+
+              }
+          );
              setSearchedBooks(searched);  
           }
           else{
@@ -71,7 +95,8 @@ function SearchPage() {
                         ></div>
                         <div className="book-shelf-changer">
                         
-                          <select defaultValue={book.shelf ? book.shelf : "none"} onChange={e => handleSelectChange(e,book)}>
+                          <select defaultValue={book.shelf} onChange={e => handleSelectChange(e,book)}>
+
                             <option value="moveTo" disabled>
                               Move to...
                             </option>
